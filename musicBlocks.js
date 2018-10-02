@@ -4,6 +4,7 @@
     function start() {
         var loaded = false;
         var sampler;
+        var majorScale = [0, 2, 4, 5, 7, 9, 11];
         var isFirst = false;
         var lastTime = 0;
         var loop = false;
@@ -12,6 +13,9 @@
         var maxMeasure = 0;
         var sched = [];
         var octave = 4;
+        var globalRoot = 0;
+        var globalKey = 'major'
+        var scales = [majorScale];
         var noteDuration = '4n'
         var currentInst = "acoustic_grand_piano"
         //        var baseUrl = "https://qscacheri.github.io/Sound-Samples/MusyngKite/acoustic_grand_piano-mp3/"
@@ -271,6 +275,7 @@
 
 
         var notesAndNums = {
+
             60: 'C4',
             61: 'C#4',
             62: 'D4',
@@ -487,6 +492,37 @@
 
         };
 
+        function getScale() {
+            if (globalKey == 'major') return 0;
+        }
+
+        ext.playDeg = function (n, beats) {
+
+            if (!isFirst) {
+                clear();
+                isFirst = true;
+            }
+            //            
+            //            if (loaded) {
+            var scaleNum = getScale();
+            console.log('scalenum  == ' + scales[scaleNum][n - 1]);
+
+            var newNote = globalRoot + (scales[scaleNum][n - 1]);
+            newNote = newNote + (12 * (octave + 1));
+            newNote = Tone.Frequency(newNote, "midi").toNote()
+            console.log('note  == ' + newNote);
+            noteAndTime = {
+                note: newNote,
+                beats: lastTime,
+                dur: noteDuration,
+                inst: instrumentList.indexOf(currentInst)
+            };
+
+            sched.push(noteAndTime);
+            lastTime += beats;
+            totalNotes++;
+        };
+
         ext.loopOn = function () {
             loop = true;
         };
@@ -533,6 +569,11 @@
             Tone.Transport.stop();
             Tone.Transport.cancel();
         };
+        
+        ext.setRoot = function(r){
+            globalRoot = noteToNum(r);
+//            console.log('new root = ' + noteToNum(r));
+        }
 
 
 
@@ -583,17 +624,20 @@
                 [' ', 'play chord %s %m.qualities for %n beat(s)', 'playChordForBeats', 'C', 'major', 1],
                 [' ', 'set loop on', 'loopOn'],
                 [' ', 'set loop off', 'loopOff'],
-                [' ', '🔊instrument 1 out🔊', 'speakerOut'],
+                [' ', '🔊speakers🔊', 'speakerOut'],
                 [' ', 'set octave to %n', 'setOctave', 4],
                 [' ', 'set duration %m.beatval ', 'setDuration', ''],
                 [' ', 'load new sound %m.sounds', 'newSound', 'acoustic_grand_piano'],
-                [' ', 'clear notes', 'clearNotes']
+                [' ', 'clear notes', 'clearNotes'],
+                [' ', 'set scale root to %m.notes','setRoot','C'],
+                [' ', 'play the %n for %n beat(s)', 'playDeg', 1,1]
 
             ],
             menus: {
                 beatval: ['1/2 note', '1/4 note', '1/8 note', '1/16 note'],
                 qualities: ['major', 'minor', 'diminished', 'augmented'],
-                sounds: instrumentList
+                sounds: instrumentList,
+                notes: ['C','Db','D','Eb','E','F','Gb','G','Ab','A','Bb','B']
             }
         };
         // Register the extension
