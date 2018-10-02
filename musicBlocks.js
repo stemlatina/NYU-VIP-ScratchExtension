@@ -4,7 +4,12 @@
     function start() {
         var loaded = false;
         var sampler;
+        var tempo = 120;
         var majorScale = [0, 2, 4, 5, 7, 9, 11];
+        var minorScale = [0, 2, 3, 5, 7, 8, 10];
+        var dorianScale = [0, 2, 3, 5, 7, 9, 10];
+        var phrygianScale = [0, 1, 3, 5, 7, 8, 10];
+        var lydianScale = [0, 2, 4, 6, 7, 9, 11];
         var isFirst = false;
         var lastTime = 0;
         var loop = false;
@@ -15,7 +20,7 @@
         var octave = 4;
         var globalRoot = 0;
         var globalKey = 'major'
-        var scales = [majorScale];
+        var scales = [majorScale, minorScale, dorianScale, phrygianScale, lydianScale];
         var noteDuration = '4n'
         var currentInst = "acoustic_grand_piano"
         //        var baseUrl = "https://qscacheri.github.io/Sound-Samples/MusyngKite/acoustic_grand_piano-mp3/"
@@ -309,25 +314,25 @@
 
             if (note == "C")
                 noteNum = 0;
-            else if (note == "Db")
+            else if (note == "Db" || note == 'C#')
                 noteNum = 1;
             else if (note == "D")
                 noteNum = 2;
-            else if (note == "Eb")
+            else if (note == "Eb" || note == "D#")
                 noteNum = 3;
             else if (note == "E")
                 noteNum = 4;
             else if (note == "F")
                 noteNum = 5;
-            else if (note == "Gb")
+            else if (note == "Gb" || note == 'F#')
                 noteNum = 6;
             else if (note == "G")
                 noteNum = 7;
-            else if (note == "Ab")
+            else if (note == "Ab" || note == "G#")
                 noteNum = 8;
             else if (note == "A")
                 noteNum = 9;
-            else if (note == "Bb")
+            else if (note == "Bb" || note == "A#")
                 noteNum = 10;
             else if (note == "B")
                 noteNum = 11;
@@ -494,6 +499,10 @@
 
         function getScale() {
             if (globalKey == 'major') return 0;
+            else if (globalKey == 'minor') return 1;
+            else if (globalKey == 'dorian') return 2;
+            else if (globalKey == 'phrygian') return 3;
+            else if (globalKey == 'lydian') return 4;
         }
 
         ext.playDeg = function (n, beats) {
@@ -502,10 +511,9 @@
                 clear();
                 isFirst = true;
             }
-            //            
-            //            if (loaded) {
+
             var scaleNum = getScale();
-            console.log('scalenum  == ' + scales[scaleNum][n - 1]);
+            //            console.log('scalenum  == ' + scales[scaleNum]);
 
             var newNote = globalRoot + (scales[scaleNum][n - 1]);
             newNote = newNote + (12 * (octave + 1));
@@ -569,16 +577,26 @@
             Tone.Transport.stop();
             Tone.Transport.cancel();
         };
-        
-        ext.setRoot = function(r){
+
+        ext.setRoot = function (r) {
             globalRoot = noteToNum(r);
-//            console.log('new root = ' + noteToNum(r));
-        }
+            //            console.log('new root = ' + noteToNum(r));
+        };
+
+        ext.setScale = function (scale) {
+            globalKey = scale;
+        };
+        
+        ext.setTempo = function (t){
+            tempo = t;
+        };
 
 
 
         ext.speakerOut = function () {
             isFirst = false;
+            Tone.Transport.bpm.value = tempo;
+
             Tone.Transport.start();
             if (lastTime % 4 == 0) {
                 maxMeasure = lastTime / 4;
@@ -624,20 +642,24 @@
                 [' ', 'play chord %s %m.qualities for %n beat(s)', 'playChordForBeats', 'C', 'major', 1],
                 [' ', 'set loop on', 'loopOn'],
                 [' ', 'set loop off', 'loopOff'],
-                [' ', '🔊speakers🔊', 'speakerOut'],
                 [' ', 'set octave to %n', 'setOctave', 4],
                 [' ', 'set duration %m.beatval ', 'setDuration', ''],
                 [' ', 'load new sound %m.sounds', 'newSound', 'acoustic_grand_piano'],
                 [' ', 'clear notes', 'clearNotes'],
-                [' ', 'set scale root to %m.notes','setRoot','C'],
-                [' ', 'play the %n for %n beat(s)', 'playDeg', 1,1]
+                [' ', 'set scale root to %m.notes', 'setRoot', 'C'],
+                [' ', 'set scale to %m.scales', 'setScale', 'major'],
+                [' ', 'play the %n for %n beat(s)', 'playDeg', 1, 1],
+                [' ', 'set tempo to %n bpm', 'setTempo',120],
+                [' ', '🔊speakers🔊', 'speakerOut']
+
 
             ],
             menus: {
                 beatval: ['1/2 note', '1/4 note', '1/8 note', '1/16 note'],
                 qualities: ['major', 'minor', 'diminished', 'augmented'],
+                scales: ['major', 'minor', 'dorian', 'phrygian', 'lydian'],
                 sounds: instrumentList,
-                notes: ['C','Db','D','Eb','E','F','Gb','G','Ab','A','Bb','B']
+                notes: ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B']
             }
         };
         // Register the extension
