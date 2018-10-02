@@ -586,14 +586,22 @@
         ext.setScale = function (scale) {
             globalKey = scale;
         };
-        
-        ext.setTempo = function (t){
+
+        ext.setTempo = function (t) {
             tempo = t;
         };
 
 
 
-        ext.speakerOut = function () {
+        ext.speakerOut = function (callback) {
+
+
+            window.setTimeout(function () {
+                callback();
+            }, Tone.TimeBase('1:0:0').toMilliseconds());
+
+
+            console.log("milli = " + Tone.TimeBase('1:4:0').toMilliseconds());
             isFirst = false;
             Tone.Transport.bpm.value = tempo;
 
@@ -649,8 +657,8 @@
                 [' ', 'set scale root to %m.notes', 'setRoot', 'C'],
                 [' ', 'set scale to %m.scales', 'setScale', 'major'],
                 [' ', 'play the %n for %n beat(s)', 'playDeg', 1, 1],
-                [' ', 'set tempo to %n bpm', 'setTempo',120],
-                [' ', '🔊speakers🔊', 'speakerOut']
+                [' ', 'set tempo to %n bpm', 'setTempo', 120],
+                ['w', '🔊speakers🔊', 'speakerOut']
 
 
             ],
