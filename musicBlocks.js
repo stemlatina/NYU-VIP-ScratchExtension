@@ -36,7 +36,9 @@
                       'C3', 'Db3', 'D3', 'Eb3', 'E3', 'F3', 'Gb3', 'G3', 'Ab3', 'A3', 'Bb3', 'B3',
                       'C4', 'Db4', 'D4', 'Eb4', 'E4', 'F4', 'Gb4', 'G4', 'Ab4', 'A4', 'Bb4', 'B4',
                       'C5', 'Db5', 'D5', 'Eb5', 'E5', 'F5', 'Gb5', 'G5', 'Ab5', 'A5', 'Bb5', 'B5'
-        ]
+        ];
+        
+        
         var instrumentList = [
   "accordion",
   "acoustic_bass",
@@ -572,7 +574,7 @@
             lastTime = 0;
             Tone.Transport.stop();
             Tone.Transport.cancel();
-        }
+        };
 
         ext.clearNotes = function () {
             totalNotes = 0;
@@ -600,7 +602,7 @@
         };
 
         ext.setNote = function (n) {
-
+            currentBeats++;
             var noteAndTime;
             if (currentNote != null) {
                 noteAndTime = {
@@ -617,7 +619,7 @@
                 currentNote = n;
                 currentBeats = 0;
             } else {
-                currentNote = n;
+                currentNote = n;    
                 console.log('first note');
             }
 
@@ -625,7 +627,7 @@
             console.log('note: ' + currentNote);
 
 
-        }
+        };
 
         ext.speakerOut = function () {
             console.log('beats: ' + currentBeats);
@@ -649,7 +651,7 @@
             currentNote = null;
             currentBeats = 0;
 
-            console.log("milli = " + Tone.TimeBase('1:4:0').toMilliseconds());
+//            console.log("milli = " + Tone.TimeBase('1:4:0').toMilliseconds());
             isFirst = false;
             Tone.Transport.bpm.value = tempo;
 
@@ -686,8 +688,7 @@
                     Tone.Transport.cancel();
                 }, convertBeat(lastTime));
             };
-        }
-
+        };
 
         // Block and block menu descriptions
         var descriptor = {
