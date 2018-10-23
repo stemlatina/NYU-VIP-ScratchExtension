@@ -22,7 +22,10 @@
         var globalKey = 'major'
         var scales = [majorScale, minorScale, dorianScale, phrygianScale, lydianScale];
         var noteDuration = '4n'
-        var currentInst = "acoustic_grand_piano"
+        var currentInst = "acoustic_grand_piano";
+        var currentBeats = 0;
+        var currentNote = null;
+        var prevNote = null;
         //        var baseUrl = "https://qscacheri.github.io/Sound-Samples/MusyngKite/acoustic_grand_piano-mp3/"
         var baseUrl = "https://qscacheri.github.io/Sound-Samples/MusyngKite/"
 
@@ -570,6 +573,7 @@
             Tone.Transport.stop();
             Tone.Transport.cancel();
         }
+
         ext.clearNotes = function () {
             totalNotes = 0;
             sched = [];
@@ -591,15 +595,59 @@
             tempo = t;
         };
 
+        ext.addBeat = function () {
+            currentBeats++;
+        };
+
+        ext.setNote = function (n) {
+
+            var noteAndTime;
+            if (currentNote != null) {
+                noteAndTime = {
+                    note: currentNote + "" + octave,
+                    beats: lastTime,
+                    dur: noteDuration,
+                    inst: instrumentList.indexOf(currentInst)
+                };
+                console.log('play '+currentNote+"for"+currentBeats+'beats');
+                console.log("note and time = " + noteAndTime.beats);
+                sched.push(noteAndTime);
+                lastTime += currentBeats;
+                totalNotes++;
+                currentNote = n;
+                currentBeats = 0;
+            } else {
+                currentNote = n;
+                console.log('first note');
+            }
+
+            console.log('beats: ' + currentBeats);
+            console.log('note: ' + currentNote);
 
 
-        ext.speakerOut = function (callback) {
+        }
 
+        ext.speakerOut = function () {
+            console.log('beats: ' + currentBeats);
+            console.log('note: ' + currentNote);
+            console.log('last time = ' + lastTime);
 
-            window.setTimeout(function () {
-                callback();
-            }, Tone.TimeBase('1:0:0').toMilliseconds());
+            var noteAndTime;
+            if (currentNote != null) {
+                noteAndTime = {
+                    note: currentNote + "" + octave,
+                    beats: lastTime,
+                    dur: noteDuration,
+                    inst: instrumentList.indexOf(currentInst)
+                };
 
+                sched.push(noteAndTime);
+                lastTime += currentBeats;
+                totalNotes++;
+            }
+            
+            currentNote = null;
+            currentBeats = 0;
 
             console.log("milli = " + Tone.TimeBase('1:4:0').toMilliseconds());
             isFirst = false;
@@ -658,7 +706,10 @@
                 [' ', 'set scale to %m.scales', 'setScale', 'major'],
                 [' ', 'play the %n for %n beat(s)', 'playDeg', 1, 1],
                 [' ', 'set tempo to %n bpm', 'setTempo', 120],
-                ['w', '🔊speakers🔊', 'speakerOut']
+                [' ', '%m.notes', 'setNote', 'C'],
+                [' ', '+', 'addBeat'],
+
+                [' ', '🔊speakers🔊', 'speakerOut']
 
 
             ],
